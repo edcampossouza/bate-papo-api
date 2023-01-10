@@ -24,7 +24,10 @@ app.get("/participants", (req, res) => {
 
 app.post("/messages", (req, res) => {
   const message = req.body;
-  const msg = `inserindo mensagem: ${JSON.stringify(message)}`;
+  const { user } = req.headers;
+  const msg = `inserindo mensagem: ${JSON.stringify(
+    message
+  )} do participante ${user}`;
   console.log(msg);
   res.send(msg);
 });
