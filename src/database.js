@@ -64,9 +64,9 @@ async function addMessage(user, message) {
       .collection("participants")
       .findOne({ name: message.to });
     if (!senderExists)
-      return { code: 402, message: "Participante nao cadastrado" };
+      return { code: 422, message: "Participante nao cadastrado" };
     if (!recipientExists && message.to !== "Todos")
-      return { code: 404, message: "Participante nao encontrado" };
+      return { code: 422, message: "Participante nao encontrado" };
     await db.collection("messages").insertOne({
       ...message,
       time: dayjs().format("HH:mm:ss"),
@@ -82,7 +82,7 @@ async function getMessages(user, limit) {
   if (limit) {
     limit = parseInt(limit);
     if (limit < 1 || isNaN(limit))
-      return { code: 400, data: "limite inválido" };
+      return { code: 422, data: "limite inválido" };
   }
   const filter = {
     $or: [{ to: user }, { to: "Todos" }],
