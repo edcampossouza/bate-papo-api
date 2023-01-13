@@ -91,7 +91,12 @@ async function getMessages(user, limit) {
       return { code: 422, data: "limite inválido" };
   }
   const filter = {
-    $or: [{ to: user }, { to: "Todos" }, { type: "messge" }],
+    $or: [
+      { to: user },
+      { to: "Todos" },
+      { type: "message" },
+      { type: "status" },
+    ],
   };
 
   const messages = await (
