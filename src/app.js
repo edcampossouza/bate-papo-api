@@ -10,11 +10,12 @@ app.use(express.json());
 
 const PORT = 5000;
 
-app.post("/participants", (req, res) => {
+app.post("/participants", async (req, res) => {
   const user = req.body;
   const msg = `inserindo usuario: ${JSON.stringify(user)}`;
   console.log(msg);
-  res.send(msg);
+  const result = await db.addUser(user);
+  return res.status(result.code).send(result.message);
 });
 
 app.get("/participants", (req, res) => {
