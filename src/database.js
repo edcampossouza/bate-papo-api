@@ -40,13 +40,19 @@ async function addUser(user) {
     return { code: 201, message: "OK" };
   } catch (error) {
     console.log(error.message);
-    return { code: 201, message: "erro desconhecido" };
+    return { code: 500, message: "erro desconhecido" };
   }
 }
 
 async function getUsers() {
-  const users = await db.collection("participants").find().toArray();
-  return { code: 200, data: users };
+  try {
+    const users = await db.collection("participants").find().toArray();
+
+    return { code: 200, data: users };
+  } catch (error) {
+    console.log(error.message);
+    return { code: 500, data: "Erro desconhecido" };
+  }
 }
 
 async function addMessage(user, message) {
@@ -85,7 +91,7 @@ async function getMessages(user, limit) {
       return { code: 422, data: "limite inválido" };
   }
   const filter = {
-    $or: [{ to: user }, { to: "Todos" }],
+    $or: [{ to: user }, { to: "Todos" }, { type: "messge" }],
   };
 
   const messages = await (
