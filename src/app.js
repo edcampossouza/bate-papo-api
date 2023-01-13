@@ -44,11 +44,12 @@ app.get("/messages", async (req, res) => {
   return res.status(result.code).send(result.data);
 });
 
-app.post("/status", (req, res) => {
+app.post("/status", async (req, res) => {
   const { user } = req.headers;
   const msg = `atualizando status: ${user}`;
   console.log(msg);
-  res.send(msg);
+  const result = await db.updateStatus(user);
+  return res.status(result.code).send(result.message);
 });
 
 app.listen(PORT, () => console.log(`server running on port ${PORT}`));

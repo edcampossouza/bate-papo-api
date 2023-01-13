@@ -99,8 +99,27 @@ async function getMessages(user, limit) {
   };
 }
 
-function updateStatus(user) {}
+async function updateStatus(user) {
+  if (!user) return { code: 422, message: "dados invalidos" };
+  try {
+    const userObject = await db
+      .collection("participants")
+      .findOne({ name: user });
+    if (!userObject) {
+      return { code: 404, message: "participante nao encontrado" };
+    } else {
+      db.collection("participants").updateOne(
+        { _id: userObject._id },
+        { $set: { lastStatus: Date.now() } }
+      );
+    }
+    return { code: 200, message: "OK" };
+  } catch (error) {
+    console.log(error.message);
+    return { code: 500, message: "erro desconhecido" };
+  }
+}
 
 function cleanInactiveUsers() {}
 
-export { addUser, getUsers, getMessages, addMessage };
+export { addUser, getUsers, getMessages, addMessage, updateStatus };
