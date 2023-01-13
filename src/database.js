@@ -65,7 +65,7 @@ async function addMessage(user, message) {
       .findOne({ name: message.to });
     if (!senderExists)
       return { code: 402, message: "Participante nao cadastrado" };
-    if (!recipientExists)
+    if (!recipientExists && message.to !== "Todos")
       return { code: 404, message: "Participante nao encontrado" };
     await db.collection("messages").insertOne({
       ...message,
