@@ -1,7 +1,7 @@
 import { MongoClient } from "mongodb";
 import dayjs from "dayjs";
 import * as dotenv from "dotenv";
-import { userSchema } from "./validation.js";
+import { messageSchema, userSchema } from "./validation.js";
 dotenv.config();
 
 const DB_URL = process.env.DATABASE_URL;
@@ -31,7 +31,7 @@ async function addUser(user) {
       .collection("participants")
       .insertOne({ ...value, lastStatus: Date.now() });
     await db.collection("messages").insertOne({
-      message: value.name,
+      from: value.name,
       to: "Todos",
       text: "entra na sala...",
       type: "status",
@@ -49,7 +49,34 @@ async function getUsers() {
   return { code: 200, data: users };
 }
 
-function addMessage(user, message) {}
+async function addMessage(user, message) {
+  const { error } = messageSchema.validate(message);
+  message = { from: user, ...message };
+  if (error) {
+    console.log(error.details);
+    return { code: 422, message: "erro de validação" };
+  }
+  try {
+    const senderExists = await db
+      .collection("participants")
+      .findOne({ name: user });
+    const recipientExists = await db
+      .collection("participants")
+      .findOne({ name: message.to });
+    if (!senderExists)
+      return { code: 402, message: "Participante nao cadastrado" };
+    if (!recipientExists)
+      return { code: 404, message: "Participante nao encontrado" };
+    await db.collection("messages").insertOne({
+      ...message,
+      time: dayjs().format("HH:mm:ss"),
+    });
+    return { code: 201, message: "ok" };
+  } catch (error) {
+    console.log(error.message);
+    return { code: 500, message: "erro desconhecido" };
+  }
+}
 
 async function getMessages(user, limit) {
   if (limit) {
@@ -76,4 +103,4 @@ function updateStatus(user) {}
 
 function cleanInactiveUsers() {}
 
-export { addUser, getUsers, getMessages };
+export { addUser, getUsers, getMessages, addMessage };

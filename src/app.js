@@ -25,14 +25,15 @@ app.get("/participants", async (req, res) => {
   res.status(users.code).send(users.data);
 });
 
-app.post("/messages", (req, res) => {
+app.post("/messages", async (req, res) => {
   const message = req.body;
   const { user } = req.headers;
   const msg = `inserindo mensagem: ${JSON.stringify(
     message
   )} do participante ${user}`;
   console.log(msg);
-  res.send(msg);
+  const result = await db.addMessage(user, message);
+  return res.status(result.code).send(result.message);
 });
 
 app.get("/messages", async (req, res) => {
