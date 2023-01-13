@@ -120,6 +120,27 @@ async function updateStatus(user) {
   }
 }
 
-function cleanInactiveUsers() {}
+async function cleanInactiveUsers() {
+  const allUsers = await db.collection("participants").find().toArray();
+  allUsers.forEach((user) => {
+    const now = Date.now();
+    const diff = now - user.lastStatus;
+    if (diff > 10 * 1000) {
+      // console.log(`removing participant: ${user.name}`);
+      db.collection("messages").insertOne({
+        from: user.name,
+        to: "Todos",
+        text: "sai da sala...",
+        type: "status",
+        time: dayjs().format("HH:mm:ss"),
+      });
+      db.collection("participants").deleteOne({ _id: user._id });
+    }
+  });
+}
+
+setInterval(() => {
+  cleanInactiveUsers();
+}, 15 * 1000);
 
 export { addUser, getUsers, getMessages, addMessage, updateStatus };
