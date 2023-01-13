@@ -93,6 +93,7 @@ async function getMessages(user, limit) {
   const filter = {
     $or: [
       { to: user },
+      { from: user },
       { to: "Todos" },
       { type: "message" },
       { type: "status" },
