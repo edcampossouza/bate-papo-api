@@ -18,10 +18,11 @@ app.post("/participants", async (req, res) => {
   return res.status(result.code).send(result.message);
 });
 
-app.get("/participants", (req, res) => {
+app.get("/participants", async (req, res) => {
   const msg = `retornando participantes`;
   console.log(msg);
-  res.send(msg);
+  const users = await db.getUsers();
+  res.status(users.code).send(users.data);
 });
 
 app.post("/messages", (req, res) => {
@@ -34,16 +35,12 @@ app.post("/messages", (req, res) => {
   res.send(msg);
 });
 
-app.get("/messages", (req, res) => {
+app.get("/messages", async (req, res) => {
+  const limit = req.query.limit;
+  const user = req.headers.user;
   const msg = `retornando mensagens`;
-  console.log(msg);
-  res.send(msg);
-});
-
-app.get("/participants", (req, res) => {
-  const msg = `retornando participantes`;
-  console.log(msg);
-  res.send(msg);
+  const result = await db.getMessages(user, limit);
+  return res.status(result.code).send(result.data);
 });
 
 app.post("/status", (req, res) => {

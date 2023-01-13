@@ -44,14 +44,36 @@ async function addUser(user) {
   }
 }
 
-function getUsers() {}
+async function getUsers() {
+  const users = await db.collection("participants").find().toArray();
+  return { code: 200, data: users };
+}
 
 function addMessage(user, message) {}
 
-function getMessages(user, limit) {}
+async function getMessages(user, limit) {
+  if (limit) {
+    limit = parseInt(limit);
+    if (limit < 1 || isNaN(limit))
+      return { code: 400, data: "limite inválido" };
+  }
+  const filter = {
+    $or: [{ to: user }, { to: "Todos" }],
+  };
+
+  const messages = await (
+    await db.collection("messages").find(filter).toArray()
+  ).reverse();
+  const limitedMessages = limit ? messages.slice(0, limit) : messages;
+  console.log(limit, limitedMessages);
+  return {
+    code: 200,
+    data: limitedMessages,
+  };
+}
 
 function updateStatus(user) {}
 
 function cleanInactiveUsers() {}
 
-export { addUser, getUsers };
+export { addUser, getUsers, getMessages };
