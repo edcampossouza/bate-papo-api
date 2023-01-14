@@ -1,7 +1,7 @@
 import { MongoClient } from "mongodb";
 import dayjs from "dayjs";
 import * as dotenv from "dotenv";
-import { messageSchema, userSchema } from "./validation.js";
+import { messageSchema, sanitizeObject, userSchema } from "./validation.js";
 dotenv.config();
 
 const DB_URL = process.env.DATABASE_URL;
@@ -21,7 +21,7 @@ async function addUser(user) {
     console.log(error.details);
     return { code: 422, message: "erro de validação" };
   }
-
+  sanitizeObject(value);
   try {
     const exists = await db
       .collection("participants")
@@ -62,6 +62,7 @@ async function addMessage(user, message) {
     console.log(error.details);
     return { code: 422, message: "erro de validação" };
   }
+  sanitizeObject(message);
   try {
     const senderExists = await db
       .collection("participants")

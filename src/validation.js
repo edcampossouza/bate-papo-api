@@ -1,4 +1,5 @@
 import Joi from "joi";
+import { stripHtml } from "string-strip-html";
 
 const userSchema = Joi.object({
   name: Joi.string().min(1).required(),
@@ -10,4 +11,16 @@ const messageSchema = Joi.object({
   type: Joi.string().valid("private_message", "message").required(),
 });
 
-export { userSchema, messageSchema };
+function sanitizeString(str) {
+  return stripHtml(str).result.trim();
+}
+function sanitizeObject(object) {
+  const keys = Object.keys(object);
+  keys.forEach((key) => {
+    if (typeof object[key] === "string")
+      object[key] = sanitizeString(object[key]);
+  });
+  return object;
+}
+
+export { userSchema, messageSchema, sanitizeString, sanitizeObject };
