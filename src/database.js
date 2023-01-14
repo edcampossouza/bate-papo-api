@@ -149,6 +149,28 @@ async function deleteMessage(id, username) {
   }
 }
 
+async function editMessage(id, newMessage, username) {
+  try {
+    const originalMessage = await db
+      .collection("messages")
+      .findOne({ _id: new ObjectId(id) });
+    if (!originalMessage)
+      return { code: 404, message: "mensagem nao encontrada" };
+    if (originalMessage.from !== username)
+      return { code: 401, message: "mensagem de outro participante" };
+    const { error } = messageSchema.validate(newMessage);
+    if (error) return { code: 422, message: "mensagem invalida" };
+    sanitizeObject(newMessage);
+    await db
+      .collection("messages")
+      .updateOne({ _id: originalMessage._id }, { $set: newMessage });
+      return { code: 200, message: "mensagem alterada com sucesso" };
+  } catch (error) {
+    console.log(error.message);
+    return { code: 500, message: "erro desconhecido" };
+  }
+}
+
 async function cleanInactiveUsers() {
   const allUsers = await db.collection("participants").find().toArray();
   allUsers.forEach((user) => {
@@ -179,4 +201,5 @@ export {
   addMessage,
   updateStatus,
   deleteMessage,
+  editMessage,
 };
