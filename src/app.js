@@ -35,6 +35,14 @@ app.get("/messages", async (req, res) => {
   return res.status(result.code).send(result.data);
 });
 
+app.delete("/messages/:id", async (req, res) => {
+  const id = req.params.id;
+  const user = req.headers.user;
+  const result = await db.deleteMessage(id, user);
+  return res.status(result.code).send(result.message);
+});
+
+
 app.post("/status", async (req, res) => {
   const { user } = req.headers;
   const result = await db.updateStatus(user);

@@ -1,4 +1,4 @@
-import { MongoClient } from "mongodb";
+import { MongoClient, ObjectId } from "mongodb";
 import dayjs from "dayjs";
 import * as dotenv from "dotenv";
 import { messageSchema, sanitizeObject, userSchema } from "./validation.js";
@@ -133,6 +133,22 @@ async function updateStatus(user) {
   }
 }
 
+async function deleteMessage(id, username) {
+  try {
+    const msg = await db
+      .collection("messages")
+      .findOne({ _id: new ObjectId(id) });
+    if (!msg) return { code: 404, message: "mensagem nao encontrada" };
+    if (msg.from !== username)
+      return { code: 401, message: "mensagem de outro participante" };
+    await db.collection("messages").deleteOne({ _id: msg._id });
+    return { code: 200, message: "mensagem deletada com sucesso" };
+  } catch (error) {
+    console.log(error.message);
+    return { code: 500, message: "erro desconhecido" };
+  }
+}
+
 async function cleanInactiveUsers() {
   const allUsers = await db.collection("participants").find().toArray();
   allUsers.forEach((user) => {
@@ -156,4 +172,11 @@ setInterval(() => {
   cleanInactiveUsers();
 }, 15 * 1000);
 
-export { addUser, getUsers, getMessages, addMessage, updateStatus };
+export {
+  addUser,
+  getUsers,
+  getMessages,
+  addMessage,
+  updateStatus,
+  deleteMessage,
+};
